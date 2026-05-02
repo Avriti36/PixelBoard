@@ -141,7 +141,7 @@ export default function Home() {
   const handleClaim = useCallback((cellId) => {
     if (!user) return;
     const now = Date.now();
-    if (lastClaim && now - lastClaim < cooldownMs) return;
+    if (lastClaim && now - lastClaim < cooldownMs) return; 
     claimBlock(cellId);
     setLastClaim(now);
   }, [user, lastClaim, cooldownMs, claimBlock]);
