@@ -157,7 +157,7 @@ io.on('connection', (socket) => {
         { new: true }
       );
 
-      if (!updated) return;
+      if (!updated) return; 
 
       // Record cooldown
       userCooldowns.set(user.id, now);
