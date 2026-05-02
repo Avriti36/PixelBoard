@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --pink:        #FF6EB4;
+  --pink-light:  #FFB3D9;
+  --pink-soft:   #FFE0F0;
+  --pink-pale:   #FFF0F7;
+  --rose:        #FF4D94;
+  --lavender:    #C9B8FF;
+  --lav-soft:    #EDE8FF;
+  --cream:       #FFF8FC;
+  --white:       #FFFFFF;
+  --text:        #5C3D52;
+  --text-soft:   #9B7B8A;
+  --text-muted:  #C4A0B5;
+  --border:      #F5C6DF;
+  --border-soft: #FAE0EF;
+  --bg:          #FFF0F7;
+  --card:        rgba(255,255,255,0.75);
+  --shadow:      0 4px 24px rgba(255, 110, 180, 0.12);
+  --shadow-lg:   0 8px 40px rgba(255, 110, 180, 0.18);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  overflow: hidden;
+}
+
+#__next { height: 100%; }
+
+/* Cute pink scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--pink-pale); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--pink-light); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--pink); }
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.85); opacity: 0.6; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.8); }
+  70%  { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50%       { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
