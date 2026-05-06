@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Pusher from 'pusher-js';
 
-export function usePusher({ user, onBlockClaimed, onLeaderboard, onOnlineCount, onCooldownMs }={}) {
+export function usePusher({ user, onBlockClaimed, onLeaderboard, onOnlineCount, onCooldownMs } = {}) {
   const [connected, setConnected] = useState(false);
   const pusherRef = useRef(null);
 
@@ -19,11 +19,24 @@ export function usePusher({ user, onBlockClaimed, onLeaderboard, onOnlineCount, 
     channel.bind('block_claimed', (data) => onBlockClaimed?.(data));
     channel.bind('leaderboard_update', (data) => onLeaderboard?.(data));
 
-    // Simulate online count via presence (simple version)
     onOnlineCount?.(1);
     onCooldownMs?.(1500);
 
+    // Polling fallback — refreshes grid every 3s in case Pusher misses events
+    const poll = setInterval(async () => {
+      try {
+        const r = await fetch('/api/grid');
+        const { cells } = await r.json();
+        cells.forEach(cell => {
+          if (cell.owner) onBlockClaimed?.(cell);
+        });
+        const lb = await fetch('/api/leaderboard').then(r => r.json());
+        onLeaderboard?.(lb);
+      } catch {}
+    }, 3000);
+
     return () => {
+      clearInterval(poll);
       channel.unbind_all();
       pusher.unsubscribe('pixelboard');
       pusher.disconnect();
@@ -33,15 +46,20 @@ export function usePusher({ user, onBlockClaimed, onLeaderboard, onOnlineCount, 
   const claimBlock = useCallback(async (cellId) => {
     if (!user) return;
     try {
-      await fetch('/api/claim', {
+      const res = await fetch('/api/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cellId, user }),
       });
+      const data = await res.json();
+      // Immediately update UI without waiting for Pusher or poll
+      if (data.ok && data.cell) {
+        onBlockClaimed?.(data.cell);
+      }
     } catch (err) {
       console.error('claim failed:', err);
     }
-  }, [user]);
+  }, [user, onBlockClaimed]);
 
   return { connected, claimBlock };
 }
