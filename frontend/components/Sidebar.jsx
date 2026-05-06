@@ -48,7 +48,7 @@ function CooldownBar({ cooldownMs, lastClaim }) {
         <div style={{
           height: '100%',
           width: `${progress * 100}%`,
-          background: ready
+          backgroundImage: ready
             ? 'linear-gradient(90deg, #34D399, #6EE7B7)'
             : 'linear-gradient(90deg, var(--pink), var(--lavender), var(--pink))',
           backgroundSize: '200% 100%',

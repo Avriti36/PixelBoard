@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Pusher from 'pusher-js';
 
-export function usePusher({ user, onBlockClaimed, onLeaderboard, onOnlineCount, onCooldownMs }) {
+export function usePusher({ user, onBlockClaimed, onLeaderboard, onOnlineCount, onCooldownMs }={}) {
   const [connected, setConnected] = useState(false);
   const pusherRef = useRef(null);
 

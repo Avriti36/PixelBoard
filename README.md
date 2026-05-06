@@ -10,18 +10,19 @@ A multiplayer real-time grid where anyone can claim tiles. Built with **Next.js*
 
 ## Stack
 
-| Layer | Tech |
-|-------|------|
-| Frontend | Next.js 14, React 18 |
-| Backend | Express 4, Socket.io 4 |
-| Database | MongoDB + Mongoose |
-| Real-time | WebSocket (Socket.io) |
+| Layer     | Tech                  |
+| --------- | --------------------- |
+| Frontend  | Next.js 14, React 18  |
+| Backend   | NExt.js route, Pusher |
+| Database  | MongoDB + Mongoose    |
+| Real-time | WebSocket (Pusher)    |
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - MongoDB running locally (`mongodb://localhost:27017`)
 
@@ -65,6 +66,7 @@ Browser C ──┘                        │
 5. Every client patches their local grid state instantly
 
 ### Conflict Resolution
+
 - Last write wins (MongoDB `findOneAndUpdate`)
 - Server-side cooldown enforcement (1.5s per user ID)
 - No optimistic updates — server is source of truth
@@ -73,12 +75,12 @@ Browser C ──┘                        │
 
 ## API Reference
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/grid` | Full grid snapshot |
-| GET | `/api/leaderboard` | Top 10 players |
-| GET | `/api/stats` | Claim stats |
-| GET | `/health` | Health check |
+| Method | Path               | Description        |
+| ------ | ------------------ | ------------------ |
+| GET    | `/api/grid`        | Full grid snapshot |
+| GET    | `/api/leaderboard` | Top 10 players     |
+| GET    | `/api/stats`       | Claim stats        |
+| GET    | `/health`          | Health check       |
 
 ### Socket Events
 
@@ -120,6 +122,7 @@ Browser C ──┘                        │
 ## Env Variables
 
 **backend/.env**
+
 ```
 PORT=4000
 MONGODB_URI=mongodb://localhost:27017/pixelboard
@@ -127,6 +130,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 **frontend/.env.local**
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:4000
 NEXT_PUBLIC_WS_URL=http://localhost:4000

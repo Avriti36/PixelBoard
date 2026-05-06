@@ -10,7 +10,6 @@ const pusher = new Pusher({
   useTLS:  true,
 });
 
-// In-memory cooldown (resets on cold start, good enough for free tier)
 const userCooldowns = new Map();
 
 export default async function handler(req, res) {
@@ -19,39 +18,46 @@ export default async function handler(req, res) {
   const { cellId, user } = req.body;
   if (cellId == null || !user?.id) return res.status(400).json({ error: 'Missing cellId or user' });
 
-  // Cooldown check
   const now = Date.now();
   const last = userCooldowns.get(user.id) ?? 0;
   const remaining = COOLDOWN_MS - (now - last);
   if (remaining > 0) return res.status(429).json({ error: 'Cooldown', remaining });
 
-  await connectDB();
+  try {
+    await connectDB();
 
-  const updated = await Cell.findOneAndUpdate(
-    { id: cellId },
-    { owner: user.id, ownerName: user.name, color: user.color, claimedAt: new Date(), $inc: { claimCount: 1 } },
-    { new: true }
-  );
+    const updated = await Cell.findOneAndUpdate(
+      { id: cellId },
+      { owner: user.id, ownerName: user.name, color: user.color, claimedAt: new Date(), $inc: { claimCount: 1 } },
+      { new: true }
+    );
 
-  if (!updated) return res.status(404).json({ error: 'Cell not found' });
+    if (!updated) return res.status(404).json({ error: 'Cell not found' });
 
-  userCooldowns.set(user.id, now);
+    userCooldowns.set(user.id, now);
 
-  const payload = {
-    cellId,
-    owner:     user.id,
-    ownerName: user.name,
-    color:     user.color,
-    claimedAt: updated.claimedAt.toISOString(),
-    claimCount: updated.claimCount,
-  };
+    const payload = {
+      cellId,
+      owner:      user.id,
+      ownerName:  user.name,
+      color:      user.color,
+      claimedAt:  updated.claimedAt.toISOString(),
+      claimCount: updated.claimCount,
+    };
 
-  // Trigger Pusher event to all clients
-  await pusher.trigger('pixelboard', 'block_claimed', payload);
+    try {
+      await pusher.trigger('pixelboard', 'block_claimed', payload);
+      const leaderboard = await computeLeaderboard();
+      await pusher.trigger('pixelboard', 'leaderboard_update', leaderboard);
+    } catch (pusherErr) {
+      // Log Pusher error but don't fail the request — DB already updated
+      console.error('Pusher error:', pusherErr.message);
+    }
 
-  // Also push updated leaderboard
-  const leaderboard = await computeLeaderboard();
-  await pusher.trigger('pixelboard', 'leaderboard_update', leaderboard);
+    res.json({ ok: true, cell: payload });
 
-  res.json({ ok: true, cell: payload });
+  } catch (err) {
+    console.error('claim error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 }
