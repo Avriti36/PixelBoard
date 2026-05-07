@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import { useUser } from '../hooks/useUser';
@@ -46,12 +46,15 @@ export default function Home() {
   const [lastClaim, setLastClaim] = useState(null);
   const [cooldownMs, setCooldownMs] = useState(1500);
   const [feed, setFeed] = useState([]);
+  const claimedCellIds = useRef(new Set());
 
   useEffect(() => {
     fetch('/api/grid')
       .then((r) => r.json())
       .then(({ cells: data, cols: c, rows: r, cooldownMs: cd }) => {
-        setCells(data.sort((a, b) => a.id - b.id));
+        const sortedCells = data.sort((a, b) => a.id - b.id);
+        claimedCellIds.current = new Set(sortedCells.filter((cell) => cell.color).map((cell) => cell.id));
+        setCells(sortedCells);
         setCols(c); setRows(r);
         if (cd) setCooldownMs(cd);
         setLoading(false);
@@ -62,12 +65,18 @@ export default function Home() {
   }, []);
 
   const handleBlockClaimed = useCallback(({ cellId, owner, ownerName, color, claimedAt }) => {
+    const wasUnclaimed = !claimedCellIds.current.has(cellId);
+    claimedCellIds.current.add(cellId);
+
     setCells((prev) => {
-      const next = [...prev];
-      next[cellId] = { ...next[cellId], owner, ownerName, color, claimedAt };
+      const next = prev.map((cell) => {
+        if (cell.id !== cellId) return cell;
+        return { ...cell, owner, ownerName, color, claimedAt };
+      });
       return next;
     });
     setStats((prev) => {
+      if (!wasUnclaimed) return prev;
       const claimed = (prev.claimed || 0) + 1;
       const total = prev.total || 1750;
       return { ...prev, claimed, unclaimed: total - claimed, percent: ((claimed / total) * 100).toFixed(1) };
@@ -106,7 +115,6 @@ export default function Home() {
       <Head>
         <title>PixelBoard 🌸 Claim Your Turf</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
       </Head>
 
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
