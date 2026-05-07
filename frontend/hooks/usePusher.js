@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Pusher from 'pusher-js';
-
-Pusher.logToConsole = true;
-
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY?.trim();
 const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER?.trim();
 
@@ -35,24 +32,24 @@ export function usePusher({
     pusherRef.current = pusher;
 
     pusher.connection.bind('connected', () => {
-      console.log('Pusher connected');
+   
       setConnected(true);
     });
 
     pusher.connection.bind('disconnected', () => {
-      console.log('Pusher disconnected');
+     
       setConnected(false);
     });
 
     pusher.connection.bind('error', (err) => {
-      console.log('Pusher error:', err);
+      
       setConnected(false);
     });
 
     const channel = pusher.subscribe('pixelboard');
 
     channel.bind('block_claimed', (data) => {
-      console.log('Realtime block:', data);
+       
       onBlockClaimed?.(data);
     });
 
@@ -97,13 +94,14 @@ export function usePusher({
       }
 
       if (data.realtimeError) {
-        console.warn('Claim saved, but realtime broadcast failed:', data.realtimeError);
+        
       }
+
 
       return data.cell;
 
     } catch (err) {
-      console.error('claim failed:', err);
+    
     }
 
   }, [user, onBlockClaimed]);
