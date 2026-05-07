@@ -1,12 +1,16 @@
 import Pusher from 'pusher';
+Pusher.logToConsole = true;
 import { connectDB } from '../../lib/mongodb';
 import { Cell, computeLeaderboard, COOLDOWN_MS } from '../../lib/models';
 
+const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY?.trim();
+const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER?.trim();
+
 const pusher = new Pusher({
   appId:   process.env.PUSHER_APP_ID,
-  key:     process.env.NEXT_PUBLIC_PUSHER_KEY,
+  key:     pusherKey,
   secret:  process.env.PUSHER_SECRET,
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+  cluster: pusherCluster,
   useTLS:  true,
 });
 
