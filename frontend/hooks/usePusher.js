@@ -96,6 +96,10 @@ export function usePusher({
         onBlockClaimed?.(data.cell);
       }
 
+      if (data.realtimeError) {
+        console.warn('Claim saved, but realtime broadcast failed:', data.realtimeError);
+      }
+
       return data.cell;
 
     } catch (err) {

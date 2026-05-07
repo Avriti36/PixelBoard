@@ -49,16 +49,23 @@ export default async function handler(req, res) {
       claimCount: updated.claimCount,
     };
 
+    let realtimeError = null;
+
     try {
       await pusher.trigger('pixelboard', 'block_claimed', payload);
       const leaderboard = await computeLeaderboard();
       await pusher.trigger('pixelboard', 'leaderboard_update', leaderboard);
     } catch (pusherErr) {
       // Log Pusher error but don't fail the request — DB already updated
-      console.error('Pusher error:', pusherErr.message);
+      realtimeError = pusherErr.message || 'Pusher trigger failed';
+      console.error('Pusher error:', {
+        message: pusherErr.message,
+        status: pusherErr.status,
+        body: pusherErr.body,
+      });
     }
 
-    res.json({ ok: true, cell: payload });
+    res.json({ ok: true, cell: payload, realtimeError });
 
   } catch (err) {
     console.error('claim error:', err.message);

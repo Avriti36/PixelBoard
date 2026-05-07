@@ -62,6 +62,7 @@ export default function Home() {
       .catch(() => setLoading(false));
 
     fetch('/api/stats').then((r) => r.json()).then(setStats).catch(() => {});
+    fetch('/api/leaderboard').then((r) => r.json()).then(setLeaderboard).catch(() => {});
   }, []);
 
   const handleBlockClaimed = useCallback(({ cellId, owner, ownerName, color, claimedAt }) => {
